@@ -1,0 +1,4 @@
+Dane są dostępne do pobrania na stronie: https://ride.citibikenyc.com/system-data
+
+Interesują nas zbiory o nazwach w formacie rrrrmm-citibike-tripdata.csv.zip.
+Analizowane dane pochodzą z 2014 i 2018 roku.

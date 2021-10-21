@@ -1,0 +1,199 @@
+---
+title: "Citi Bikes 2014 & 2018"
+author: "Marek Wiese, Emil Płonka"
+runtime: shiny
+output:
+  ioslides_presentation: 
+    widescreen: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Opis rozwiązania
+
+Głównym celem naszej analizy było porównanie danych z roku 2014 oraz 2018. Chcieliśmy zbadać kto, kiedy i w jaki sposób korzysta z rowerów miejskich w Nowym Jorku. W tym celu przetwarzaliśmy dane z 2 lat za pomocą pakietu `dplyr` oraz prezentowaliśmy wyniki w postaci wykresów generowanych przy pomocy biblioteki `ggplot2`. Ponadto wykorzystaliśmy pakiety `plotly` oraz `shiny` w celu stworzenia interaktywnych wykresów oraz aplikacji webowej z mapą. W dalszej części prezentacji przedstawiamy wyniki naszych badań, które zostaną omówione podczas zajęć.
+
+```{r, include = FALSE}
+source("wykresy_2014.R")
+source("wykresy_2018.R")
+theme_set(theme_bw())
+```
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+people_2014 %>%
+  ggplot(aes(x = age, y = n, fill = gender)) +
+  geom_bar(stat = "identity", width = 1, color = "gray") +
+  labs(x = "Wiek", y = "Liczba podróży", fill = "Płeć",
+       title = "Liczba podróży w zależności od wieku z podziałem na płeć",
+       subtitle = "Na podstawie danych z 2014 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+people_2018 %>%
+  ggplot(aes(x = age, y = n, fill = gender)) +
+  geom_bar(stat = "identity", width = 1, color = "gray") +
+  labs(x = "Wiek", y = "Liczba podróży", fill = "Płeć",
+       title = "Liczba podróży w zależności od wieku z podziałem na płeć",
+       subtitle = "Na podstawie danych z 2018 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+<font size="4"> Głównymi użytkownikami są mężczyźni. </font>
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trip_hours_by_age_groups_2014 %>%
+  ggplot(aes(x = gender, y = total_hours, fill = age_group)) +
+  geom_col(position = "dodge", col = "black") +
+  labs(x = "Płeć", y = "Przejechane godziny", fill = "Grupa wiekowa",
+       title = "Suma przejechanych godzin ze względu na płeć i grupę wiekową",
+       subtitle = "Na podstawie danych z 2014 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trip_hours_by_age_groups_2018 %>%
+  ggplot(aes(x = gender, y = total_hours, fill = age_group)) +
+  geom_col(position = "dodge", col = "black") +
+  labs(x = "Płeć", y = "Przejechane godziny", fill = "Grupa wiekowa",
+       title = "Suma przejechanych godzin ze względu na płeć i grupę wiekową",
+       subtitle = "Na podstawie danych z 2018 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+<font size="4"> Wśród mężczyzn i kobiet większość użytkowników to osoby w średnim wieku. </font>
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trips_by_day_hour_2014 %>%
+  ggplot(aes(x = day, y = n, fill = user_type)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  scale_y_continuous(name = "Liczba podróży", labels = comma) +
+  labs(x = "", fill = "Typ użytkownika",
+       title = "Liczba odbytych podróży w poszczególne dni tygodnia",
+       subtitle = "Na podstawie danych z 2014 roku")
+```
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trips_by_day_hour_2018 %>%
+  ggplot(aes(x = day, y = n, fill = user_type)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  scale_y_continuous(name = "Liczba podróży", labels = comma) +
+  labs(x = "", fill = "Typ użytkownika",
+       title = "Liczba odbytych podróży w poszczególne dni tygodnia",
+       subtitle = "Na podstawie danych z 2018 roku")
+```
+
+<font size="4"> Przeważnie z rowerów korzystają subskrybenci, głównie w dni robocze. </font>
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trips_by_day_hour_2014 %>%
+  mutate(day_group = as.factor(ifelse(day %in% c("Sobota", "Niedziela"), "Weekend", "Pon - Pt"))) %>%
+  ggplot(aes(x = hour, y = n, fill = day_group)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Godzina", y = "Liczba podróży", fill = "",
+       title = "Liczba odbytych podrózy w dni robocze oraz weekendy w danych godzinach",
+       subtitle = "Na podstawie danych z 2014 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trips_by_day_hour_2018 %>%
+  mutate(day_group = as.factor(ifelse(day %in% c("Sobota", "Niedziela"), "Weekend", "Pon - Pt"))) %>%
+  ggplot(aes(x = hour, y = n, fill = day_group)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Godzina", y = "Liczba podróży", fill = "",
+       title = "Liczba odbytych podrózy w dni robocze oraz weekendy w danych godzinach",
+       subtitle = "Na podstawie danych z 2018 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+<font size="4"> Najpopularniejsze godziny przejażdżek to ~9 i ~17 (godziny pracy w tygodniu). </font>
+
+##
+
+```{r, warning=FALSE, out.width = "90%", out.height="90%"}
+trips_by_day_hour_2014 %>%
+  mutate(day_group = as.factor(ifelse(day %in% c("Sobota", "Niedziela"), "Weekend", "Pon - Pt"))) %>%
+  filter(day_group == "Weekend") %>%
+  ggplot(aes(x = hour, y = n, fill = user_type)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Godzina", y = "Liczba podróży", fill = "Typ użytkownika",
+       title = "Liczba odbytych podróży w weekend w danych godzinach",
+       subtitle = "Na podstawie danych z 2014 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+##
+
+```{r, warning=FALSE, out.width = "80%", out.height="80%"}
+trips_by_day_hour_2018 %>%
+  mutate(day_group = as.factor(ifelse(day %in% c("Sobota", "Niedziela"), "Weekend", "Pon - Pt"))) %>%
+  filter(day_group == "Weekend") %>%
+  ggplot(aes(x = hour, y = n, fill = user_type)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Godzina", y = "Liczba podróży", fill = "Typ użytkownika",
+       title = "Liczba odbytych podróży w weekend w danych godzinach",
+       subtitle = "Na podstawie danych z 2018 roku") +
+  scale_y_continuous(labels = comma)
+```
+
+<font size="4"> W weekendy zanotowano większą aktywność ludzi bez subskrybcji. </font> <br>
+<font size="4"> W odróznieniu od dni roboczych, ludzie chętniej wybierają się na przejażdzki w południe. </font>
+
+##
+
+```{r, warning=FALSE, out.width = "100%", out.height="100%"}
+ggplotly(p_2014)
+```
+
+##
+
+```{r, warning=FALSE, out.width = "100%", out.height="100%"}
+ggplotly(p_2018)
+```
+
+```{r, warning=FALSE, include=FALSE}
+source("dens_2014_2018.R")
+```
+
+##
+
+```{r, warning=FALSE, out.width = "80%", out.height="80%"}
+ggtern::grid.arrange(map1, map2, nrow=1, top = "Częstotliwość użytkowania stacji początkowych w 2014 i 2018 roku")
+```
+
+<font size="4"> Możemy zauważyć, że częstotliwość korzystania z poszczególnych stacji nie zmieniła się w ciągu analizowanych lat. </font> <br>
+<font size="4"> Pomimo dodania nowych stacji w 2018 roku, natężenie wypożyczania rowerów jest wciąż największe w centrum Manhattanu. </font>
+
+##
+
+Nie wiedzieliśmy jak zapisać prezentację ze wstawką z `shiny`, więc wysyłamy statyczną wersję. Na zajęciach będziemy pracować już z dynamiczną prezentacją z działającą aplikacją oraz dodamy kilka komentarzy i wniosków od siebie.
+
+```{r, warning=FALSE}
+shinyApp(ui_2014, server_2014)
+```
+
+##
+
+```{r, warning=FALSE}
+shinyApp(ui_2018, server_2018)
+```
+
